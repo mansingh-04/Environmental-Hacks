@@ -1,110 +1,93 @@
-import { Icon } from "@/components/icon";
-import type { Verdict, WasteAnalysis } from "@/types/waste";
-import { Section } from "./section";
+"use client";
 
-const VERDICT_STYLE: Record<Verdict, { card: string; icon: "check" | "alert" }> = {
-  recycle: { card: "bg-brand-deep text-white", icon: "check" },
-  special: { card: "bg-warn-soft text-warn ring-1 ring-warn/20", icon: "alert" },
-  hazardous: { card: "bg-danger-soft text-danger ring-1 ring-danger/20", icon: "alert" },
-};
+import { TriangleAlert } from "lucide-react";
+import { motion } from "motion/react";
+import { fadeUp, stagger } from "@/lib/motion";
+import type { WasteAnalysis } from "@/types/waste";
+import { CountUp } from "./count-up";
 
-export function VerdictCard({ analysis, action }: { analysis: WasteAnalysis; action: React.ReactNode }) {
-  const style = VERDICT_STYLE[analysis.verdict.kind];
+/** "What should I do?" — the primary answer, shown without any interaction. */
+export function ActionSection({ analysis }: { analysis: WasteAnalysis }) {
+  const { instruction, preparationSteps, warnings } = analysis.disposal;
   return (
-    <section className={`rounded-3xl p-5 animate-rise [animation-delay:80ms] ${style.card}`}>
-      <div className="flex items-start justify-between gap-3">
-        <p className="text-sm font-medium opacity-80">What should I do with it?</p>
-        {action}
-      </div>
-      <h2 className="mt-2 flex items-center gap-2 text-2xl leading-tight font-bold">
-        <Icon name={style.icon} className="size-7 shrink-0" />
-        {analysis.verdict.headline}
-      </h2>
-      <p className="mt-2 leading-relaxed opacity-90">{analysis.disposal.instruction}</p>
-    </section>
-  );
-}
-
-export function DisposalSection({ analysis }: { analysis: WasteAnalysis }) {
-  const { preparationSteps, warnings } = analysis.disposal;
-  return (
-    <Section icon="recycle" title="Prepare it" delay={160}>
-      <ol className="flex flex-col gap-3">
+    <motion.section variants={stagger(0.05, 0.35)} initial="hidden" animate="show" className="border-t border-ink pt-5">
+      <motion.h2 variants={fadeUp} className="label text-muted">
+        What to do
+      </motion.h2>
+      <motion.p variants={fadeUp} className="mt-2 text-lg leading-snug font-medium">
+        {instruction}
+      </motion.p>
+      <ol className="mt-4 border-t border-line">
         {preparationSteps.map((step, i) => (
-          <li key={step} className="flex items-center gap-3">
-            <span className="grid size-7 shrink-0 place-items-center rounded-full bg-brand-soft text-sm font-bold text-brand-deep">{i + 1}</span>
-            <span className="font-medium">{step}</span>
-          </li>
+          <motion.li key={step} variants={fadeUp} className="flex items-baseline gap-4 border-b border-line py-3">
+            <span className="label w-5 text-material">{String(i + 1).padStart(2, "0")}</span>
+            <span className="text-[15px]">{step}</span>
+          </motion.li>
         ))}
       </ol>
       {warnings.map((w) => (
-        <p key={w} className="mt-4 flex gap-2 rounded-2xl bg-warn-soft p-3 text-sm font-medium text-warn">
-          <Icon name="alert" className="size-4 shrink-0 translate-y-0.5" /> {w}
-        </p>
+        <motion.p key={w} variants={fadeUp} className="mt-4 flex gap-2.5 border-l-2 border-caution bg-caution-soft px-3 py-2.5 text-sm text-caution">
+          <TriangleAlert className="mt-0.5 size-4 shrink-0" />
+          {w}
+        </motion.p>
       ))}
-    </Section>
+    </motion.section>
   );
 }
 
-export function ValueSection({ analysis }: { analysis: WasteAnalysis }) {
-  const { value, earning } = analysis;
+export function ValueSummary({ analysis }: { analysis: WasteAnalysis }) {
+  const { value } = analysis;
+  if (value.max === 0) return <span className="text-[15px] font-semibold">{value.estimatedValue}</span>;
   return (
-    <Section icon="coins" title="Estimated value" delay={240}>
-      <p className="flex items-baseline gap-2">
-        <span className="text-4xl font-bold tracking-tight">{value.estimatedValue}</span>
-        {value.estimatedValue !== "No resale value" && <span className="text-muted">{value.unit}</span>}
-      </p>
-      <p className="mt-1 text-sm text-muted">{value.explanation} Estimate only — actual prices vary.</p>
-      <div className="mt-4 rounded-2xl bg-brand-soft p-4">
-        <p className="text-xs font-semibold tracking-wide text-brand-deep uppercase">How to earn from it</p>
-        <p className="mt-1 font-semibold text-brand-deep">{earning.method}</p>
-        <p className="mt-1 text-sm leading-relaxed text-brand-deep/80">{earning.explanation}</p>
-      </div>
-    </Section>
+    <span className="flex items-baseline gap-1 tabular-nums">
+      <span className="text-xl font-semibold tracking-tight">
+        {value.currency}
+        <CountUp value={value.min} />
+        {value.max !== value.min && (
+          <>
+            –<CountUp value={value.max} />
+          </>
+        )}
+      </span>
+      <span className="text-xs text-muted">{value.unit}</span>
+    </span>
   );
 }
 
-export function RecyclerSection({ analysis }: { analysis: WasteAnalysis }) {
-  const r = analysis.recycler;
+export function ValueDetails({ analysis }: { analysis: WasteAnalysis }) {
+  const { value, earning, identification } = analysis;
   return (
-    <Section icon="pin" title="Where to take it" delay={320}>
-      <div className="flex items-start gap-3">
-        <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-brand-deep text-lime">
-          <Icon name="pin" className="size-6" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="text-lg leading-tight font-semibold">{r.name}</p>
-          <p className="text-sm text-muted">{r.type} · {r.location}</p>
-          <div className="mt-2 flex flex-wrap gap-2 text-xs font-medium">
-            {r.distance && <span className="rounded-full bg-brand-soft px-2.5 py-1 text-brand-deep">{r.distance}</span>}
-            {r.hours && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-canvas px-2.5 py-1">
-                <Icon name="clock" className="size-3" /> {r.hours}
-              </span>
-            )}
-            <span className="rounded-full bg-canvas px-2.5 py-1 text-muted">Demo location</span>
-          </div>
-        </div>
-      </div>
-    </Section>
+    <motion.div variants={stagger(0.05)} initial="hidden" animate="show" className="flex flex-col gap-4">
+      <motion.p variants={fadeUp} className="label text-faint">
+        Based on: {identification.material} · {value.region ? `${value.region} approximate local rate` : "approximate national rate"}
+      </motion.p>
+      <motion.p variants={fadeUp} className="text-[15px] leading-relaxed text-muted">
+        {value.explanation} This is an estimate — actual prices vary by dealer and condition.
+      </motion.p>
+      <motion.div variants={fadeUp} className="rounded-md border border-line bg-surface p-4">
+        <p className="label text-muted">How to earn from it</p>
+        <p className="mt-1.5 font-semibold">{earning.method}</p>
+        <p className="mt-1 text-sm leading-relaxed text-muted">{earning.explanation}</p>
+      </motion.div>
+    </motion.div>
   );
 }
 
-export function ImpactSection({ analysis }: { analysis: WasteAnalysis }) {
+export function ImpactDetails({ analysis }: { analysis: WasteAnalysis }) {
   const { harm, benefit, fact } = analysis.environmentalImpact;
   return (
-    <Section icon="leaf" title="Why it matters" delay={400}>
-      <div className="flex flex-col gap-3">
-        <p className="flex gap-3 text-sm leading-relaxed">
-          <Icon name="x" className="size-5 shrink-0 text-danger" />
-          <span><strong className="font-semibold">If dumped: </strong>{harm}</span>
-        </p>
-        <p className="flex gap-3 text-sm leading-relaxed">
-          <Icon name="check" className="size-5 shrink-0 text-brand" />
-          <span><strong className="font-semibold">Done right: </strong>{benefit}</span>
-        </p>
-      </div>
-      <p className="mt-4 rounded-2xl bg-lime/40 p-4 text-sm font-semibold text-brand-deep">{fact}</p>
-    </Section>
+    <motion.dl variants={stagger(0.06)} initial="hidden" animate="show" className="flex flex-col gap-4 text-[15px] leading-relaxed">
+      <motion.div variants={fadeUp}>
+        <dt className="label text-muted">If mixed or dumped</dt>
+        <dd className="mt-1">{harm}</dd>
+      </motion.div>
+      <motion.div variants={fadeUp}>
+        <dt className="label text-muted">Sorted correctly</dt>
+        <dd className="mt-1">{benefit}</dd>
+      </motion.div>
+      <motion.p variants={fadeUp} className="border-l-2 border-material pl-3 text-sm font-medium">
+        {fact}
+      </motion.p>
+    </motion.dl>
   );
 }

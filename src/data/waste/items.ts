@@ -12,6 +12,7 @@ export interface WasteItemRecord {
   categoryLabel: string;
   recyclable: boolean;
   hazardous: boolean;
+  destination: string;
   disposalInstruction: string;
   preparationSteps: string[];
   warnings: string[];
@@ -23,11 +24,12 @@ export const WASTE_ITEMS: Record<WasteItemId, WasteItemRecord> = {
   "pet-bottle": {
     id: "pet-bottle",
     name: "PET Plastic Bottle",
-    material: "PET (#1 plastic)",
+    material: "PET #1",
     category: "plastic",
     categoryLabel: "Recyclable Plastic",
     recyclable: true,
     hazardous: false,
+    destination: "a scrap dealer or dry-waste collection centre",
     disposalInstruction: "Put it in your dry-waste / recyclables bin, or sell it with other PET bottles.",
     preparationSteps: [
       "Empty any remaining liquid",
@@ -49,11 +51,12 @@ export const WASTE_ITEMS: Record<WasteItemId, WasteItemRecord> = {
   "cardboard-box": {
     id: "cardboard-box",
     name: "Cardboard Box",
-    material: "Corrugated cardboard",
+    material: "Corrugated",
     category: "paper",
     categoryLabel: "Recyclable Paper",
     recyclable: true,
     hazardous: false,
+    destination: "a scrap dealer or dry-waste collection centre",
     disposalInstruction: "Flatten it and add it to dry waste, or sell it to a scrap dealer.",
     preparationSteps: [
       "Remove plastic tape and labels",
@@ -80,6 +83,7 @@ export const WASTE_ITEMS: Record<WasteItemId, WasteItemRecord> = {
     categoryLabel: "Recyclable Metal",
     recyclable: true,
     hazardous: false,
+    destination: "a scrap dealer or metal recycler",
     disposalInstruction: "Put it in dry waste or keep it aside to sell — cans are the most valuable household recyclable.",
     preparationSteps: ["Empty it completely", "Rinse out sticky residue", "Crush it to save space"],
     warnings: [],
@@ -96,11 +100,12 @@ export const WASTE_ITEMS: Record<WasteItemId, WasteItemRecord> = {
   "glass-bottle": {
     id: "glass-bottle",
     name: "Glass Bottle",
-    material: "Soda-lime glass",
+    material: "Soda-lime",
     category: "glass",
     categoryLabel: "Recyclable Glass",
     recyclable: true,
     hazardous: false,
+    destination: "a scrap dealer or glass collection point",
     disposalInstruction: "Keep it unbroken and give it to a scrap dealer or glass collection point.",
     preparationSteps: ["Empty and rinse it", "Remove the metal or plastic cap", "Keep it intact — don't smash it"],
     warnings: ["Wrap broken glass in paper and label it so collectors don't get hurt."],
@@ -117,11 +122,12 @@ export const WASTE_ITEMS: Record<WasteItemId, WasteItemRecord> = {
   "phone-charger": {
     id: "phone-charger",
     name: "Phone Charger",
-    material: "Mixed plastic, copper & circuit board",
+    material: "Copper & plastic",
     category: "e-waste",
     categoryLabel: "E-Waste",
     recyclable: true,
     hazardous: true,
+    destination: "an authorised e-waste collection point",
     disposalInstruction: "Never put it in household bins. Take it to an authorised e-waste collection point.",
     preparationSteps: ["Unplug it and keep the cable attached", "Bundle it with any other old electronics"],
     warnings: ["Contains metals that leach into soil if dumped.", "Don't cut cables or burn them to extract copper."],
@@ -138,11 +144,12 @@ export const WASTE_ITEMS: Record<WasteItemId, WasteItemRecord> = {
   battery: {
     id: "battery",
     name: "Battery",
-    material: "Alkaline / lithium cell",
+    material: "Alkaline / lithium",
     category: "hazardous",
     categoryLabel: "Hazardous Waste",
     recyclable: true,
     hazardous: true,
+    destination: "a battery drop-off box or e-waste collection point",
     disposalInstruction: "Never put it in any household bin. Drop it at a battery or e-waste collection box.",
     preparationSteps: [
       "Tape over both terminals",

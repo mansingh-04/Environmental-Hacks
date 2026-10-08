@@ -18,7 +18,14 @@ export interface WasteDetection {
   visualDetails?: Record<string, unknown>;
 }
 
+export interface GeoPoint {
+  lat: number;
+  lng: number;
+}
+
 export interface WasteValue {
+  /** Set when the estimate was adjusted for the user's area. */
+  region?: string;
   min: number;
   max: number;
   currency: string;
@@ -30,6 +37,7 @@ export interface Recycler {
   name: string;
   type: string;
   location: string;
+  accepts: string[];
   distanceKm?: number;
   hours?: string;
 }
@@ -41,19 +49,23 @@ export interface WasteKnowledge {
   categoryLabel: string;
   recyclable: boolean;
   hazardous: boolean;
+  category: WasteCategory;
+  /** Generic kind of drop-off point, used before nearby recyclers are known. */
+  destination: string;
   disposalInstruction: string;
   preparationSteps: string[];
   warnings: string[];
   earning: { method: string; explanation: string };
   impact: { harm: string; benefit: string; fact: string };
   value: WasteValue;
-  recyclers: Recycler[];
 }
 
 export type Verdict = "recycle" | "special" | "hazardous";
 
 export interface WasteAnalysis {
   identification: {
+    itemId: WasteItemId;
+    categoryKey: WasteCategory;
     name: string;
     material: string;
     category: string;
@@ -67,31 +79,26 @@ export interface WasteAnalysis {
   };
   value: {
     estimatedValue: string;
+    min: number;
+    max: number;
+    currency: string;
     unit: string;
     explanation: string;
+    region?: string;
   };
   earning: {
     method: string;
     explanation: string;
   };
-  recycler: {
-    name: string;
-    type: string;
-    location: string;
-    distance?: string;
-    hours?: string;
-  };
+  /** Generic drop-off guidance; always available. */
+  destination: string;
+  /** Nearby recyclers; empty until the user shares their location. */
+  recyclers: Recycler[];
   environmentalImpact: {
     explanation: string;
     harm: string;
     benefit: string;
     fact: string;
   };
-  spokenSummary: string;
 }
 
-export interface ChatMessage {
-  id: string;
-  role: "user" | "assistant";
-  text: string;
-}

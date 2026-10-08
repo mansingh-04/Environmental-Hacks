@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Know Your Waste. Do the Right Thing.",
     start_url: "/",
     display: "standalone",
-    background_color: "#f3f5ef",
-    theme_color: "#0e9f6e",
+    background_color: "#f4f1ea",
+    theme_color: "#1b1a17",
     icons: [{ src: "/icon.svg", sizes: "any", type: "image/svg+xml" }],
   };
 }

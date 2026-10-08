@@ -1,7 +1,8 @@
-import type { ChatMessage, WasteAnalysis, WasteDetection, WasteKnowledge } from "@/types/waste";
+import type { ConversationContext } from "@/types/conversation";
+import type { WasteAnalysis, WasteDetection, WasteKnowledge } from "@/types/waste";
 
 export interface WasteAgent {
   analyze(detection: WasteDetection, knowledge: WasteKnowledge): Promise<WasteAnalysis>;
-  /** Answers a follow-up question scoped to the currently detected item. */
-  answer(question: string, analysis: WasteAnalysis, history: ChatMessage[]): Promise<string>;
+  /** Answers a follow-up about the current item, in the conversation's language. */
+  answer(question: string, context: ConversationContext): Promise<string>;
 }

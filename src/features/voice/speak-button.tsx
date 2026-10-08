@@ -1,35 +1,44 @@
 "use client";
 
+import { Volume2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Icon } from "@/components/icon";
-import { useVoice } from "./use-voice";
+import { activeLanguage, useLanguageState } from "@/features/language/language-store";
+import { voiceSummary } from "@/features/waste/pipeline";
+import { LANGUAGES } from "@/lib/languages";
+import { speechOutput } from "@/providers";
+import type { WasteAnalysis } from "@/types/waste";
+import { Waveform } from "./waveform";
 
-export function SpeakButton({ text }: { text: string }) {
-  const voice = useVoice();
-  const [speaking, setSpeaking] = useState(false);
+/** Reads a short, conversational summary of the result in the current language. */
+export function SpeakButton({ analysis }: { analysis: WasteAnalysis }) {
+  const { language, script } = activeLanguage(useLanguageState());
+  const [state, setState] = useState<"idle" | "speaking" | "no-voice">("idle");
 
-  useEffect(() => () => voice?.stopSpeaking(), [voice]);
+  useEffect(() => () => speechOutput.stop(), []);
 
-  if (!voice?.canSpeak) return null;
+  if (!speechOutput.isSupported()) return null;
 
-  function toggle() {
-    if (!voice) return;
-    if (speaking) {
-      voice.stopSpeaking();
-      return setSpeaking(false);
+  async function toggle() {
+    if (state === "speaking") {
+      speechOutput.stop();
+      return setState("idle");
     }
-    setSpeaking(true);
-    voice.speak(text, () => setSpeaking(false));
+    setState("speaking");
+    const started = await speechOutput.speak(voiceSummary(analysis, language, script), language, { script, onEnd: () => setState("idle") });
+    if (!started) {
+      setState("no-voice");
+      setTimeout(() => setState("idle"), 2500);
+    }
   }
 
   return (
     <button
       onClick={toggle}
-      aria-label={speaking ? "Stop" : "Listen"}
-      className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 text-sm font-semibold ring-1 ring-current/20"
+      aria-label={state === "speaking" ? "Stop reading" : "Read result aloud"}
+      className="inline-flex min-h-9 items-center gap-2 rounded-md border border-line bg-surface px-3 text-sm font-medium transition hover:border-ink/30 active:scale-95"
     >
-      <Icon name={speaking ? "stop" : "volume"} className="size-4" />
-      {speaking ? "Stop" : "Listen"}
+      {state === "speaking" ? <Waveform className="bg-accent" /> : <Volume2 className="size-4" />}
+      {state === "speaking" ? "Stop" : state === "no-voice" ? `No ${LANGUAGES[language].name} voice here` : "Listen"}
     </button>
   );
 }
